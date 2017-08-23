@@ -1,1 +1,2 @@
 configs/config.py
+configs/nginx_template.conf
