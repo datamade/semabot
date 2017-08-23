@@ -1,3 +1,4 @@
 configs/config.py
 configs/nginx_template.conf
 configs/supervisor_template.conf
+scripts/after_install.sh
