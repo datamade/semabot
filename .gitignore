@@ -1,5 +1,7 @@
 /keyrings/live/pubring.gpg~
 /keyrings/live/pubring.kbx~
 /keyrings/live/secring.gpg
-/config.py
 __pycache__
+keys.tar
+private.key
+/configs/config.py
