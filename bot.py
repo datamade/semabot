@@ -70,14 +70,16 @@ def deployments():
                                                                       instanceId=instance)
                 for event in deployment_instances['instanceSummary']['lifecycleEvents']:
                     if event['status'] == 'Failed':
-                        logs.append(event['diagnostics']['logTail'])
+                        logs.append({'event': event['lifecycleEventName'], 
+                                     'log': event['diagnostics']['logTail']})
 
 
         message = '**{subject} ({group})**'.format(subject=data['Subject'],
                                                    group=message_data['deploymentGroupName'])
         if logs:
             message += '\n\n'
-            message += '```\n{}\n```'.format('\n'.join(logs))
+            for log in logs:
+                message += '{event}\n{log}'.format(**log)
 
         flow.send_message(ORG_ID, CHANNEL_ID, message)
 
