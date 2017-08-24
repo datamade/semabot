@@ -1,3 +1,4 @@
 Flask==0.12.2
 flow-python==0.6
 gunicorn==19.7.1
+validatesns==0.1.1
