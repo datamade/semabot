@@ -79,7 +79,7 @@ def deployments():
         if logs:
             message += '\n\n'
             for log in logs:
-                message += '{event}\n{log}'.format(**log)
+                message += '**[Lifecycle Event: {event}]**\n\n```\n{log}\n```'.format(**log)
 
         flow.send_message(ORG_ID, CHANNEL_ID, message)
 
