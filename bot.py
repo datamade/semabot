@@ -9,10 +9,15 @@ import validatesns
 from flask import Flask, request, abort
 from flow import Flow
 
-from config import ORG_ID, CHANNEL_ID
+from raven.contrib.flask import Sentry
+
+from config import ORG_ID, CHANNEL_ID, SENTRY_DSN
 
 flow = Flow('botbotbot')
 app = Flask(__name__)
+
+if SENTRY_DSN:
+    sentry = Sentry(app, dsn=SENTRY_DSN)
 
 
 @app.route('/')
