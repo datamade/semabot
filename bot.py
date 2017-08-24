@@ -11,9 +11,9 @@ from flow import Flow
 
 from raven.contrib.flask import Sentry
 
-from config import ORG_ID, CHANNEL_ID, SENTRY_DSN
+from config import ORG_ID, CHANNEL_ID, SENTRY_DSN, BOTNAME
 
-flow = Flow('botbotbot')
+flow = Flow(BOTNAME)
 app = Flask(__name__)
 
 if SENTRY_DSN:
