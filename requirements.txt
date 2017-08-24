@@ -3,3 +3,4 @@ Flask==0.12.2
 gunicorn==19.7.1
 validatesns==0.1.1
 raven[flask]
+boto3==1.4.6
