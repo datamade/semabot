@@ -50,7 +50,7 @@ def deployments():
     message_type = data['Type']
 
     if message_type == 'SubscriptionConfirmation':
-        confirmation = requests.get(data['SubscribeURL'])
+        requests.get(data['SubscribeURL'])
 
     elif message_type == 'Notification':
 
@@ -66,8 +66,8 @@ def deployments():
             for setlist in group['deploymentGroupInfo']['ec2TagSet']['ec2TagSetList']:
                 for tag in setlist:
                     filters = [
-                       {'Name': 'tag-key', 'Values': [tag['Key']]},
-                       {'Name': 'tag-value', 'Values': [tag['Value']]}
+                        {'Name': 'tag-key', 'Values': [tag['Key']]},
+                        {'Name': 'tag-value', 'Values': [tag['Value']]}
                     ]
                     ec2_filters.extend(filters)
 
@@ -86,9 +86,8 @@ def deployments():
                                                                       instanceId=instance)
                 for event in deployment_instances['instanceSummary']['lifecycleEvents']:
                     if event['status'] == 'Failed':
-                        logs.append({'event': event['lifecycleEventName'], 
+                        logs.append({'event': event['lifecycleEventName'],
                                      'log': event['diagnostics']['logTail']})
-
 
         message = '**{subject} ({group})**'.format(subject=data['Subject'],
                                                    group=message_data['deploymentGroupName'])

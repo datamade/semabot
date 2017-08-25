@@ -13,7 +13,7 @@ sudo: false
 before_script:
 - cp configs/config.py.travis config.py
 script:
-- flake8
+- flake8 --ignore=E501
 after_deploy:
 - if [ "$TRAVIS_TAG" ]; then curl -sL https://sentry.io/get-cli/ | bash; fi
 - if [ "$TRAVIS_TAG" ]; then export SENTRY_ORG=datamade; fi
