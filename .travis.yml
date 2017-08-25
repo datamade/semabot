@@ -1,0 +1,39 @@
+branches:
+  only:
+  - master
+  - "/^v0.*$/"
+language: python
+python:
+- '3.4'
+install:
+- pip install --upgrade pip
+- pip install -r requirements.txt
+dist: trusty
+sudo: false
+before_script:
+- cp configs/config.py.travis config.py
+script:
+- flake8
+after_deploy:
+- if [ "$TRAVIS_TAG" ]; then curl -sL https://sentry.io/get-cli/ | bash; fi
+- if [ "$TRAVIS_TAG" ]; then export SENTRY_ORG=datamade; fi
+- if [ "$TRAVIS_TAG" ]; then export SENTRY_PROJECT=semaphor-bot; fi
+- if [ "$TRAVIS_TAG" ]; then VERSION=$(/usr/local/bin/sentry-cli releases propose-version);
+  fi
+- if [ "$TRAVIS_TAG" ]; then /usr/local/bin/sentry-cli releases new $VERSION; fi
+- if [ "$TRAVIS_TAG" ]; then /usr/local/bin/sentry-cli releases set-commits $VERSION
+  --commit datamade/semabot@`git rev-parse HEAD`; fi
+- if [ "$TRAVIS_TAG" ]; then /usr/local/bin/sentry-cli releases finalize $VERSION;
+  fi
+
+deploy:
+  provider: codedeploy
+  access_key_id: AKIAJNYGDLOJKHOUWCAA
+  secret_access_key:
+    secure: ep2lavMG8FM6rpBUYzWI9UlwH6J7C7FJ3MYPPYcmp3YJFsDZIyBjFOrD2Pd6Pdq04vkB7AZfj0Myrzu9/JLsM7BTJ1Pz8fi+yf2fI5/W/YvCrTXDusVDZg59UAMjXA30uX+rQZSB4TSjt/4qCDV2f9VXouOmiSRtFx++yLW/D9eiPJ24gtsmN+RI0FXbPO6TMdxaOqqWtftqz/88pIcau3B7ychPBF4hMH5PnDzlLU1xHOwZnrtrMXIWxnuvz/H5HyO+pNm/WyYuecM5BRoAqNvy++rq4Q3EZTNJQSJbthEQUiNaQCYf5PZr/D3yJWJMaTifGurKjRPJkLo4yExwEJoznnoWMxKtSSZN+N8fO9EJnmlbhIYg+BJK/7MPHYIqwBCiPikMzaQsyUFplDhbRZoii+qAvVNEHPd9wnJSu3qYF5rt78EZdNXt6vqmyHKuFMxoLGi96+/04mXr3hDbYBDPHibzGyTkKkKxbHC0gLOEpJu5VyL8ROhg81RAzs1381h3iICNT7rHCRjp/yC70+aUIgFZOl6J62ZzIV2K4Gb/tTBWN5O5GM/jC90fz8uPlz4lpt1+x7hTDcAvnDp6UpF7+UFWAReajCdSpl4gDoIVEAGjkChmc/xvTLxcvCZp39SedLCmSEsGuJa+dPMXlx+X0PWh0sUa/o81JlU1lis=
+  revision_type: github
+  application: semabot
+  deployment_group: staging
+  on:
+    branch:
+      - master

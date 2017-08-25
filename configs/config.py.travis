@@ -1,0 +1,4 @@
+BOTNAME = ''
+ORG_ID = ''
+CHANNEL_ID = ''
+SENTRY_DSN = ''
