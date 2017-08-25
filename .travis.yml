@@ -4,7 +4,7 @@ branches:
   - "/^v0.*$/"
 language: python
 python:
-- '3.4'
+- '3.5'
 install:
 - pip install --upgrade pip
 - pip install -r requirements.txt
@@ -37,3 +37,4 @@ deploy:
   on:
     branch:
       - master
+    tags: true
