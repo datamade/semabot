@@ -113,7 +113,10 @@ def deployments():
             for log in logs:
                 message += '**[Lifecycle Event: {event}]**\n\n```\n{log}\n```'.format(**log)
 
-        channel_id = CHANNEL_MAP[message_data['applicationName']]
+        try:
+            channel_id = CHANNEL_MAP[message_data['applicationName']]
+        except KeyError:
+            channel_id = CHANNEL_MAP['semabot']
 
         flow.send_message(ORG_ID, channel_id, message)
 
