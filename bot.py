@@ -1,4 +1,5 @@
 import json
+from json import JSONDecodeError
 
 import requests
 
@@ -64,7 +65,7 @@ def deployments():
 
         try:
             message_data = json.loads(data['Message'])
-        except KeyError:
+        except JSONDecodeError:
             # This handles the case where the notification is not an actual
             # deployment. This happens when you setup a new trigger
             channel_id = CHANNEL_MAP['semabot']
