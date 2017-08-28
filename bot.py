@@ -69,7 +69,7 @@ def deployments():
             # This handles the case where the notification is not an actual
             # deployment. This happens when you setup a new trigger
             channel_id = CHANNEL_MAP['semabot']
-            message = '**{}**\n'.format(data['subject'])
+            message = '**{}**\n'.format(data['Subject'])
             message += data['Message']
             flow.send_message(ORG_ID, channel_id, message)
             return 'foop'
@@ -82,7 +82,23 @@ def deployments():
             group = client.get_deployment_group(applicationName=message_data['applicationName'],
                                                 deploymentGroupName=message_data['deploymentGroupName'])
             ec2_filters = []
-            for setlist in group['deploymentGroupInfo']['ec2TagSet']['ec2TagSetList']:
+
+            tag_list = group['deploymentGroupInfo']['ec2TagSet']['ec2TagSetList']
+
+            if not tag_list:
+                message = '**{}**\n'.format(data['Subject'])
+                message += 'Deployment for {app} ({group}) not created'.format(app=message_data['applicationName'],
+                                                                                 group=message_data['deploymentGroupName'])
+
+                try:
+                    channel_id = CHANNEL_MAP[message_data['applicationName']]
+                except KeyError:
+                    channel_id = CHANNEL_MAP['semabot']
+
+                flow.send_message(ORG_ID, channel_id, message)
+                return 'foop'
+
+            for setlist in tag_list:
                 for tag in setlist:
                     filters = [
                         {'Name': 'tag-key', 'Values': [tag['Key']]},
