@@ -69,7 +69,9 @@ def deployments():
             # This handles the case where the notification is not an actual
             # deployment. This happens when you setup a new trigger
             channel_id = CHANNEL_MAP['semabot']
-            flow.send_message(ORG_ID, channel_id, data['Message'])
+            message = '**{}**\n'.format(data['subject'])
+            message += data['Message']
+            flow.send_message(ORG_ID, channel_id, message)
             return 'foop'
 
         logs = []
