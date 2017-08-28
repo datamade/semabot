@@ -11,10 +11,23 @@ from flow import Flow
 
 from raven.contrib.flask import Sentry
 
-from config import ORG_ID, CHANNEL_ID, SENTRY_DSN, BOTNAME
+from config import ORG_ID, CHANNEL_ID, SENTRY_DSN, BOTNAME, BOTPW
 
 flow = Flow(BOTNAME)
 app = Flask(__name__)
+
+
+try:
+    flow.start_up(BOTNAME)
+except flow.FlowError as e:
+    app.logger.info('Bot {} already created'.format(BOTNAME))
+
+
+try:
+    flow.create_device(BOTNAME, BOTPW)
+except flow.FlowError as e:
+    app.logger.info('Device for bot {} already excists'.format(BOTNAME))
+
 
 if SENTRY_DSN:
     sentry = Sentry(app, dsn=SENTRY_DSN)
