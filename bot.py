@@ -56,7 +56,7 @@ def sentry():
 
     data = json.loads(request.data.decode('utf-8'))
     message = '**ERROR {}**\n'.format(data['message'])
-    return 'fiip'
+    return message
 
 
 @app.route('/deployments/', methods=['POST'])
