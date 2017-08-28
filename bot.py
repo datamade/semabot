@@ -29,7 +29,7 @@ if SENTRY_DSN:
 
 @app.route('/')
 def index():
-    channel_id = CHANNEL_MAP['testing']
+    channel_id = CHANNEL_MAP['semabot']
     flow.send_message(ORG_ID, channel_id, 'botbotbot')
     return 'foo'
 
