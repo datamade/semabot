@@ -11,7 +11,7 @@ from flow import Flow
 
 from raven.contrib.flask import Sentry
 
-from config import ORG_ID, CHANNEL_ID, SENTRY_DSN, BOTNAME, BOTPW
+from config import ORG_ID, CHANNEL_MAP, SENTRY_DSN, BOTNAME, BOTPW
 
 flow = Flow(BOTNAME)
 app = Flask(__name__)
@@ -29,7 +29,8 @@ if SENTRY_DSN:
 
 @app.route('/')
 def index():
-    flow.send_message(ORG_ID, CHANNEL_ID, 'botbotbot')
+    channel_id = CHANNEL_MAP['testing']
+    flow.send_message(ORG_ID, channel_id, 'botbotbot')
     return 'foo'
 
 
@@ -103,7 +104,9 @@ def deployments():
             for log in logs:
                 message += '**[Lifecycle Event: {event}]**\n\n```\n{log}\n```'.format(**log)
 
-        flow.send_message(ORG_ID, CHANNEL_ID, message)
+        channel_id = CHANNEL_MAP[message_data['applicationName']]
+
+        flow.send_message(ORG_ID, channel_id, message)
 
     return 'foop'
 
