@@ -35,6 +35,11 @@ def index():
     return 'foo'
 
 
+@app.route('/error/')
+def error():
+    return 1 / 0
+
+
 @app.route('/pong/')
 def pong():
 
@@ -44,6 +49,14 @@ def pong():
         abort(401)
 
     return DEPLOYMENT_ID
+
+
+@app.route('/sentry/', methods=['POST'])
+def sentry():
+
+    data = json.loads(request.data.decode('utf-8'))
+    message = '**ERROR {}**\n'.format(data['message'])
+    return 'fiip'
 
 
 @app.route('/deployments/', methods=['POST'])
@@ -145,4 +158,4 @@ def deployments():
 if __name__ == "__main__":
     import sys
     port = int(sys.argv[1])
-    app.run(port=port, debug=True)
+    app.run(port=port)
