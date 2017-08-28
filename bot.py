@@ -87,8 +87,9 @@ def deployments():
 
             if not tag_list:
                 message = '**{}**\n'.format(data['Subject'])
-                message += 'Deployment for {app} ({group}) not created'.format(app=message_data['applicationName'],
-                                                                                 group=message_data['deploymentGroupName'])
+                fmt = 'Deployment for {app} ({group}) not created'
+                message += fmt.format(app=message_data['applicationName'],
+                                      group=message_data['deploymentGroupName'])
 
                 try:
                     channel_id = CHANNEL_MAP[message_data['applicationName']]
