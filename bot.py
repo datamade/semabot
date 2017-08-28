@@ -18,6 +18,7 @@ app = Flask(__name__)
 try:
     flow = Flow(BOTNAME)
 except flow.FlowError as e:
+    flow = Flow()
     flow.create_device(BOTNAME, BOTPW)
     app.logger.info('Device for bot {} created'.format(BOTNAME))
 
@@ -61,7 +62,15 @@ def deployments():
 
     elif message_type == 'Notification':
 
-        message_data = json.loads(data['Message'])
+        try:
+            message_data = json.loads(data['Message'])
+        except KeyError:
+            # This handles the case where the notification is not an actual
+            # deployment. This happens when you setup a new trigger
+            channel_id = CHANNEL_MAP['semabot']
+            flow.send_message(ORG_ID, channel_id, data['Message'])
+            return 'foop'
+
         logs = []
 
         if message_data['status'] == 'FAILED':
