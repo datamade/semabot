@@ -18,15 +18,9 @@ app = Flask(__name__)
 
 
 try:
-    flow.start_up(BOTNAME)
-except flow.FlowError as e:
-    app.logger.info('Bot {} already created'.format(BOTNAME))
-
-
-try:
     flow.create_device(BOTNAME, BOTPW)
 except flow.FlowError as e:
-    app.logger.info('Device for bot {} already excists'.format(BOTNAME))
+    app.logger.info('Device for bot {} already exists'.format(BOTNAME))
 
 
 if SENTRY_DSN:
