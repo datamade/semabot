@@ -34,6 +34,8 @@ class MessageHandler(object):
             response = self.lastIssue()
         elif self.message == 'last branch':
             response = self.lastBranch()
+        elif self.message == 'last build':
+            response = self.lastBuild()
         elif self.message.startswith('stats since'):
             response = self.stats()
 
@@ -57,6 +59,7 @@ Here are the things you can do:
   `last comment`: Returns the last comment logged in this channel from Github
   `last issue`: Returns the last issue logged in this channel from Github
   `last deployment`: Returns the last deployment logged in this channel from CodeDeploy
+  `last build`: Returns the last build from Travis
   `stats since <datetime>`: Returns error and deployment counts since a given time for this channel
         '''
 
@@ -88,6 +91,9 @@ Here are the things you can do:
         return response
 
     def stats(self):
+        return "Not yet implemented"
+
+    def lastBuild(self):
         return "Not yet implemented"
 
 
