@@ -25,6 +25,8 @@ after_deploy:
   --commit datamade/semabot@`git rev-parse HEAD`; fi
 - if [ "$TRAVIS_TAG" ]; then /usr/local/bin/sentry-cli releases finalize $VERSION;
   fi
+notifications:
+  webhooks: https://semabot.datamade.us/travis/
 
 deploy:
   provider: codedeploy

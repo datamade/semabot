@@ -12,7 +12,7 @@ from flow import Flow
 
 from raven.contrib.flask import Sentry
 
-from config import ORG_ID, CHANNEL_MAP, SENTRY_DSN, BOTNAME, BOTPW
+from config import ORG_ID, CHANNEL_MAP, SENTRY_DSN, BOTNAME, BOTPW, TRAVIS_MAP
 
 app = Flask(__name__)
 
@@ -50,6 +50,24 @@ def pong():
 
     return DEPLOYMENT_ID
 
+
+@app.route('/travis/', methods=['POST'])
+def travis():
+
+    data = json.loads(request.data.decode('utf-8'))
+
+    message = 'Travis for {name} ({branch}) build finished with status **{status}**\n'
+    message += data['build_url']
+    message = message.format(name=data['repository']['name'],
+                             branch=data['branch'],
+                             status=data['status_message'])
+    try:
+        slug = TRAVIS_MAP[data['repository']['name']]
+        channel_id = CHANNEL_MAP[slug]
+    except KeyError:
+        channel_id = CHANNEL_MAP['semabot']
+
+    return 'fuup'
 
 @app.route('/sentry/', methods=['POST'])
 def sentry():
