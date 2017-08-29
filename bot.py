@@ -1,8 +1,6 @@
 from flow import Flow
 
-from raven.contrib.flask import Sentry
-
-from config import ORG_ID, CHANNEL_MAP, SENTRY_DSN, BOTNAME, BOTPW, NICE_NAMES
+from config import ORG_ID, CHANNEL_MAP, BOTNAME, BOTPW, NICE_NAMES
 
 try:
     flow = Flow(BOTNAME)
@@ -108,6 +106,7 @@ def respond(notif_type, data):
 
             handler = MessageHandler(message, sender_id, channel_id)
             handler.respond()
+
 
 if __name__ == "__main__":
     print('Listening for notifications ...')
