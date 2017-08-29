@@ -120,7 +120,7 @@ if __name__ == "__main__":
     try:
         deployment_id = sys.argv[1]
     except IndexError:
-        deployment_id = None
+        deployment_id = ''
 
     with open('/tmp/bot_running.txt', 'w') as f:
         f.write(deployment_id)
