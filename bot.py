@@ -57,8 +57,10 @@ def sentry():
     data = json.loads(request.data.decode('utf-8'))
     message = json.dumps(data, indent=4)
 
-    channel_id = CHANNEL_MAP['semabot']
-    flow.send_message(ORG_ID, channel_id, message)
+    print(message)
+
+    # channel_id = CHANNEL_MAP['semabot']
+    # flow.send_message(ORG_ID, channel_id, message)
     return message
 
 
