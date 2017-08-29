@@ -55,11 +55,12 @@ def pong():
 def travis():
     data = json.loads(request.form['payload'])
 
-    message = 'Travis for {name} ({branch}) build finished with status **{status}**\n'
+    message = 'Travis build for started by **{committer_name}** for {name} ({branch}) finished with status **{status}**\n'
     message += data['build_url']
     message = message.format(name=data['repository']['name'],
                              branch=data['branch'],
-                             status=data['status_message'])
+                             status=data['status_message'],
+                             committer_name=data['committer_name'])
     try:
         slug = TRAVIS_MAP[data['repository']['name']]
         channel_id = CHANNEL_MAP[slug]
