@@ -115,5 +115,15 @@ def respond(notif_type, data):
 
 
 if __name__ == "__main__":
+    import sys
+
+    try:
+        deployment_id = sys.argv[1]
+    except IndexError:
+        deployment_id = None
+
+    with open('/tmp/bot_running.txt', 'w') as f:
+        f.write(deployment_id)
+
     print('Listening for notifications ...')
     flow.process_notifications()
