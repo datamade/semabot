@@ -55,8 +55,10 @@ def pong():
 def sentry():
 
     data = json.loads(request.data.decode('utf-8'))
-    message = '**ERROR {}**\n'.format(data['message'])
-    app.logger.info(message)
+    message = json.dumps(data, indent=4)
+
+    channel_id = CHANNEL_MAP['semabot']
+    flow.send_message(ORG_ID, channel_id, message)
     return message
 
 
