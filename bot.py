@@ -56,12 +56,26 @@ def sentry():
 
     data = json.loads(request.data.decode('utf-8'))
 
-    message = '**{message}**\n{url}'.format(**data)
+    message = '**{project_name}**\n\n'.format(**data)
+    message += '**{message}**\n{url}'.format(**data)
     exception = data['event']['sentry.interfaces.Exception']
-    traceback = '\n'.join(v['context_line'] for v in exception['values'])
-    message += '\n```{}```'.format(traceback)
 
-    channel_id = CHANNEL_MAP['semabot']
+    traceback = []
+
+    for value in exception['values']:
+        for frame in value['stacktrace']['frames']:
+            context = 'File {filename}, line {lineno}, in {function}\n'.format(**frame)
+            context += '  {}'.format(frame['context_line'].strip())
+            traceback.append(context)
+
+    traceback = '\n'.join(traceback)
+    message += '\n```\n{}\n```\n'.format(traceback)
+
+    try:
+        channel_id = CHANNEL_MAP[data['project']]
+    except KeyError:
+        channel_id = CHANNEL_MAP['semabot']
+
     flow.send_message(ORG_ID, channel_id, message)
     return message
 
@@ -103,9 +117,10 @@ def deployments():
                                                 deploymentGroupName=message_data['deploymentGroupName'])
             ec2_filters = []
 
-            tag_list = group['deploymentGroupInfo']['ec2TagSet']['ec2TagSetList']
+            try:
+                tag_list = group['deploymentGroupInfo']['ec2TagSet']['ec2TagSetList']
 
-            if not tag_list:
+            except KeyError:
                 message = '**{}**\n'.format(data['Subject'])
                 fmt = 'Deployment for {app} ({group}) not created'
                 message += fmt.format(app=message_data['applicationName'],
