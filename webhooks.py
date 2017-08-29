@@ -53,8 +53,7 @@ def pong():
 
 @app.route('/travis/', methods=['POST'])
 def travis():
-
-    data = json.loads(request.data.decode('utf-8'))
+    data = json.loads(request.form['payload'])
 
     message = 'Travis for {name} ({branch}) build finished with status **{status}**\n'
     message += data['build_url']
@@ -142,6 +141,7 @@ def deployments():
                 tag_list = group['deploymentGroupInfo']['ec2TagSet']['ec2TagSetList']
 
             except KeyError:
+
                 message = '**{}**\n'.format(data['Subject'])
                 fmt = 'Deployment for {app} ({group}) not created'
                 message += fmt.format(app=message_data['applicationName'],
