@@ -1,0 +1,22 @@
+BOTNAME = '<name for your bot within semaphor>'
+BOTPW = '<password for your bot>'
+ORG_ID = '<semaphor organization ID>'
+
+# The keys here are the names of applications within CodeDeploy & Sentry To get
+# the deployment notifications for an app from CodeDeploy to get logged to the
+# same channel as the error notifications for that app from Sentry, these
+# should match. You'll at least need the default channel "semabot" for the app
+# to work.
+CHANNEL_MAP = {
+    'semabot': '<default channel ID for the bot to log to>',
+}
+
+# These are display names that you'd like to use in your messages. The keys
+# should line up with the keys in the CHANNEL_MAP.
+NICE_NAMES = {
+    'semabot': 'Semaphor Bot',
+}
+
+# This is to log errors from this app to Sentry. It's not needed to receive
+# webhook payloads from Sentry.
+SENTRY_DSN = ''
