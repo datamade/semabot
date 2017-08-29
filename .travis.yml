@@ -26,7 +26,9 @@ after_deploy:
 - if [ "$TRAVIS_TAG" ]; then /usr/local/bin/sentry-cli releases finalize $VERSION;
   fi
 notifications:
-  webhooks: https://semabot.datamade.us/travis/
+  webhooks:
+    - https://semabot.datamade.us/travis/
+    - https://91095a19.ngrok.io/travis/
 
 deploy:
   provider: codedeploy
