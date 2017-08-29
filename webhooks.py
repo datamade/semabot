@@ -67,7 +67,10 @@ def travis():
     except KeyError:
         channel_id = CHANNEL_MAP['semabot']
 
+    flow.send_message(ORG_ID, channel_id, message)
+
     return 'fuup'
+
 
 @app.route('/sentry/', methods=['POST'])
 def sentry():

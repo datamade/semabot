@@ -49,7 +49,7 @@ class MessageHandler(object):
 
         message = '**Hi there {}!**\n'.format(self.sender_name)
         message += 'The projects associated with this channel are: \n{}'.format('\n  '.join(projects))
-        message += '\n{}\n'.format('*'*50)
+        message += '\n{}\n'.format('*' * 50)
         message += '''
 Here are the things you can do:
   `last error`: Returns the last error message logged in this channel from sentry
