@@ -55,12 +55,14 @@ def pong():
 def sentry():
 
     data = json.loads(request.data.decode('utf-8'))
-    message = json.dumps(data, indent=4)
 
-    print(message)
+    message = '**{message}**\n{url}'.format(**data)
+    exception = data['event']['sentry.interfaces.Exception']
+    traceback = '\n'.join(v['context_line'] for v in exception['values'])
+    message += '\n```{}```'.format(traceback)
 
-    # channel_id = CHANNEL_MAP['semabot']
-    # flow.send_message(ORG_ID, channel_id, message)
+    channel_id = CHANNEL_MAP['semabot']
+    flow.send_message(ORG_ID, channel_id, message)
     return message
 
 
