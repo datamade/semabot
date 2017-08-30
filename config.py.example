@@ -28,3 +28,6 @@ TRAVIS_MAP = {
 # This is to log errors from this app to Sentry. It's not needed to receive
 # webhook payloads from Sentry.
 SENTRY_DSN = ''
+
+# This is so that we can test the sentry notifications
+SENTRY_ACCESS_TOKEN = ''
