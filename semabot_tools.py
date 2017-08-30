@@ -67,10 +67,10 @@ if __name__ == "__main__":
     if all_args == {None}:
         parser.print_help()
         print_channels()
-    
+
     elif all_args.isdisjoint(set(channels)):
         print('"{all_args}" is not a valid application. Please choose a valid application:\n {channels}'.format(channels='\n'.join(channels),
-                                                                                                              all_args=', '.join(a for a in all_args if a)))
+                                                                                                                all_args=', '.join(a for a in all_args if a)))
         sys.exit(0)
 
     if args.test_sentry:
@@ -81,4 +81,3 @@ if __name__ == "__main__":
 
     if args.test_travis:
         print('Not yet implemented')
-
