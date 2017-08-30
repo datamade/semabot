@@ -201,5 +201,10 @@ def deployments():
 
 if __name__ == "__main__":
     import sys
-    port = int(sys.argv[1])
+
+    try:
+        port = int(sys.argv[1])
+    except ValueError:
+        port = 5000
+
     app.run(port=port, debug=True)
