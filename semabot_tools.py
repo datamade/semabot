@@ -51,19 +51,27 @@ def test_sentry(app_name):
 
 if __name__ == "__main__":
     import argparse
+    import sys
 
     channels = list(CHANNEL_MAP.keys())
 
     parser = argparse.ArgumentParser(description='Various tools for configuring and testing configurations for Semabot')
-    parser.add_argument('--list-channels', action='store_true', help='List channels that Semabot has access to')
-    parser.add_argument('--test-sentry', choices=channels, help='Test sentry integration for a given app')
-    parser.add_argument('--test-codedeploy', choices=channels, help='Test CodeDeploy integration for a given app')
-    parser.add_argument('--test-travis', choices=channels, help='Test')
+    parser.add_argument('--test-sentry', type=str, help='Test sentry integration for a given app')
+    parser.add_argument('--test-codedeploy', type=str, help='Test CodeDeploy integration for a given app')
+    parser.add_argument('--test-travis', type=str, help='Test')
 
     args = parser.parse_args()
 
-    if args.list_channels:
+    all_args = {args.test_sentry, args.test_codedeploy, args.test_travis}
+
+    if all_args == {None}:
+        parser.print_help()
         print_channels()
+    
+    elif all_args.isdisjoint(set(channels)):
+        print('"{all_args}" is not a valid application. Please choose a valid application:\n {channels}'.format(channels='\n'.join(channels),
+                                                                                                              all_args=', '.join(a for a in all_args if a)))
+        sys.exit(0)
 
     if args.test_sentry:
         test_sentry(args.test_sentry)
