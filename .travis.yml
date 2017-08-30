@@ -28,7 +28,6 @@ after_deploy:
 notifications:
   webhooks:
     - https://semabot.datamade.us/travis/
-    - https://91095a19.ngrok.io/travis/
 
 deploy:
   provider: codedeploy
