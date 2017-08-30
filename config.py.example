@@ -17,6 +17,14 @@ NICE_NAMES = {
     'semabot': 'Semaphor Bot',
 }
 
+# This maps Github / Travis repo names to the names of applications in
+# CodeDeploy. In the example, these happen to be the same thing. Eventually, we
+# should just make all of these names consistent across services.
+
+TRAVIS_MAP = {
+    'semabot': 'semabot',
+}
+
 # This is to log errors from this app to Sentry. It's not needed to receive
 # webhook payloads from Sentry.
 SENTRY_DSN = ''
