@@ -166,7 +166,7 @@ def deployments():
                 message += '**[Lifecycle Event: {event}]**\n\n```\n{log}\n```'.format(**log)
 
         try:
-            channel_id = CHANNEL_MAP[message_data['applicationName']]
+            channel_id = CHANNEL_MAP[deployment_info['applicationName']]
         except KeyError:
             channel_id = CHANNEL_MAP['semabot']
 
