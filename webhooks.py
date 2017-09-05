@@ -129,61 +129,37 @@ def deployments():
             flow.send_message(ORG_ID, channel_id, message)
             return 'foop'
 
+        deployment_id = message_data['deploymentId']
+        instance_id = message_data['instanceId']
+
+        client = boto3.client('codedeploy')
+
+        deployment_instances = client.get_deployment_instance(deploymentId=deployment_id,
+                                                              instanceId=instance_id)
+        deployment_info = client.get_deployment(deploymentId=deployment_id)
+
         logs = []
 
-        if message_data['status'] == 'FAILED':
+        if message_data['instanceStatus'].lower() == 'failed':
 
-            client = boto3.client('codedeploy')
-            group = client.get_deployment_group(applicationName=message_data['applicationName'],
-                                                deploymentGroupName=message_data['deploymentGroupName'])
-            ec2_filters = []
+            for event in deployment_instances['instanceSummary']['lifecycleEvents']:
+                if event['status'] == 'Failed':
+                    logs.append({'event': event['lifecycleEventName'],
+                                 'log': event['diagnostics']['logTail']})
 
-            try:
-                tag_list = group['deploymentGroupInfo']['ec2TagSet']['ec2TagSetList']
+        client = boto3.client('ec2')
+        instance_info = client.describe_instances(InstanceIds=[instance_id])
+        tags = instance_info['Reservations'][0]['Instances'][0]['Tags']
+        instance_name = [t['Value'] for t in tags if t['Key'] == 'Name']
 
-            except KeyError:
+        message = '**{status}: AWS CodeDeploy {deployment_id} in {region} to {appname} ({group}) on {instance_name}**'
 
-                message = '**{}**\n'.format(data['Subject'])
-                fmt = 'Deployment for {app} ({group}) not created'
-                message += fmt.format(app=message_data['applicationName'],
-                                      group=message_data['deploymentGroupName'])
-
-                try:
-                    channel_id = CHANNEL_MAP[message_data['applicationName']]
-                except KeyError:
-                    channel_id = CHANNEL_MAP['semabot']
-
-                flow.send_message(ORG_ID, channel_id, message)
-                return 'foop'
-
-            for setlist in tag_list:
-                for tag in setlist:
-                    filters = [
-                        {'Name': 'tag-key', 'Values': [tag['Key']]},
-                        {'Name': 'tag-value', 'Values': [tag['Value']]}
-                    ]
-                    ec2_filters.extend(filters)
-
-            client = boto3.client('ec2')
-            instances = client.describe_instances(Filters=ec2_filters)
-
-            instance_ids = []
-            for reservation in instances['Reservations']:
-                for instance in reservation['Instances']:
-                    instance_ids.append(instance['InstanceId'])
-
-            client = boto3.client('codedeploy')
-
-            for instance in instance_ids:
-                deployment_instances = client.get_deployment_instance(deploymentId=message_data['deploymentId'],
-                                                                      instanceId=instance)
-                for event in deployment_instances['instanceSummary']['lifecycleEvents']:
-                    if event['status'] == 'Failed':
-                        logs.append({'event': event['lifecycleEventName'],
-                                     'log': event['diagnostics']['logTail']})
-
-        message = '**{subject} ({group})**'.format(subject=data['Subject'],
-                                                   group=message_data['deploymentGroupName'])
+        message = message.format(status=message_data['instanceStatus'],
+                                 group=deployment_info['deploymentGroupName'],
+                                 deployment_id=deployment_id,
+                                 region=message_data['region'],
+                                 appname=deployment_info['deploymentInfo']['applicationName'],
+                                 instance_name=instance_name)
         if logs:
             message += '\n\n'
             for log in logs:
