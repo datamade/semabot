@@ -97,7 +97,7 @@ def sentry():
     except KeyError:
         channel_id = CHANNEL_MAP['semabot']
 
-    flow.send_message(ORG_ID, channel_id, message)
+    flow.send_message(ORG_ID, channel_id, message[:5999])
     return message
 
 
@@ -136,7 +136,7 @@ def deployments():
 
         deployment_instances = client.get_deployment_instance(deploymentId=deployment_id,
                                                               instanceId=instance_id)
-        deployment_info = client.get_deployment(deploymentId=deployment_id)
+        deployment_info = client.get_deployment(deploymentId=deployment_id)['deploymentInfo']
 
         logs = []
 
@@ -158,7 +158,7 @@ def deployments():
                                  group=deployment_info['deploymentGroupName'],
                                  deployment_id=deployment_id,
                                  region=message_data['region'],
-                                 appname=deployment_info['deploymentInfo']['applicationName'],
+                                 appname=deployment_info['applicationName'],
                                  instance_name=instance_name)
         if logs:
             message += '\n\n'
