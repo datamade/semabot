@@ -150,7 +150,7 @@ def deployments():
         client = boto3.client('ec2')
         instance_info = client.describe_instances(InstanceIds=[instance_id])
         tags = instance_info['Reservations'][0]['Instances'][0]['Tags']
-        instance_name = [t['Value'] for t in tags if t['Key'] == 'Name']
+        instance_name = [t['Value'] for t in tags if t['Key'] == 'Name'][0]
 
         message = '**{status}: AWS CodeDeploy {deployment_id} in {region} to {appname} ({group}) on {instance_name}**'
 
