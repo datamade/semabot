@@ -86,7 +86,12 @@ def sentry():
     for value in exception['values']:
         for frame in value['stacktrace']['frames']:
             context = 'File {filename}, line {lineno}, in {function}\n'.format(**frame)
-            context += '  {}'.format(frame['context_line'].strip())
+
+            try:
+                context += '  {}'.format(frame['context_line'].strip())
+            except KeyError:
+                context += '  {}'.format(frame['vars']['value'])
+
             traceback.append(context)
 
     traceback = '\n'.join(traceback)
