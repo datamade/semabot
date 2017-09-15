@@ -79,7 +79,12 @@ def sentry():
 
     message = '**{project_name}**\n\n'.format(**data)
     message += '**{message}**\n{url}'.format(**data)
-    exception = data['event']['sentry.interfaces.Exception']
+    event = data['event']
+
+    try:
+        exception = event['sentry.interfaces.Exception']
+    except KeyError:
+        exception = event['sentry.interfaces.Message']
 
     traceback = []
 
@@ -94,8 +99,11 @@ def sentry():
 
             traceback.append(context)
 
-    traceback = '\n'.join(traceback)
-    message += '\n```\n{}\n```\n'.format(traceback)
+    if traceback:
+        traceback = '\n'.join(traceback)
+        message += '\n```\n{}\n```\n'.format(traceback)
+    else:
+        message += '\n```\n{}\n```\n'.format(exception)
 
     try:
         channel_id = CHANNEL_MAP[data['project']]
@@ -104,6 +112,27 @@ def sentry():
 
     flow.send_message(ORG_ID, channel_id, message[:5999])
     return message
+
+
+@app.route('/errors/', methods=['POST'])
+def errors():
+
+    data = json.loads(request.data.decode('utf-8'))
+
+    try:
+        validatesns.validate(data)
+    except validatesns.ValidationError:
+        abort(400)
+
+    message_type = data['Type']
+
+    if message_type == 'SubscriptionConfirmation':
+        requests.get(data['SubscribeURL'])
+
+    elif message_type == 'Notification':
+        sentry.captureMessage(data)
+
+    return 'fwip'
 
 
 @app.route('/deployments/', methods=['POST'])
