@@ -73,7 +73,7 @@ def travis():
 
 
 @app.route('/sentry/', methods=['POST'])
-def sentry():
+def sentry_message():
 
     data = json.loads(request.data.decode('utf-8'))
 
