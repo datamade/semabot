@@ -14,5 +14,6 @@ def parseException(data):
 
     return '\n'.join(traceback)
 
+
 def parseMessage(data):
-    return str(data)
+    return str(data['message'])
