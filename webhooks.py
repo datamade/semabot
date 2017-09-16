@@ -13,6 +13,7 @@ from flow import Flow
 from raven.contrib.flask import Sentry
 
 from config import ORG_ID, CHANNEL_MAP, SENTRY_DSN, BOTNAME, BOTPW, TRAVIS_MAP
+from utils import parseException, parseMessage
 
 app = Flask(__name__)
 
@@ -82,28 +83,11 @@ def sentry_message():
     event = data['event']
 
     try:
-        exception = event['sentry.interfaces.Exception']
+        body = event['sentry.interfaces.Exception']
+        message += '\n```\n{}\n```\n'.format(parseException(body))
     except KeyError:
-        exception = event['sentry.interfaces.Message']
-
-    traceback = []
-
-    for value in exception['values']:
-        for frame in value['stacktrace']['frames']:
-            context = 'File {filename}, line {lineno}, in {function}\n'.format(**frame)
-
-            try:
-                context += '  {}'.format(frame['context_line'].strip())
-            except KeyError:
-                context += '  {}'.format(frame['vars']['value'])
-
-            traceback.append(context)
-
-    if traceback:
-        traceback = '\n'.join(traceback)
-        message += '\n```\n{}\n```\n'.format(traceback)
-    else:
-        message += '\n```\n{}\n```\n'.format(exception)
+        body = event['sentry.interfaces.Message']
+        message += '\n```\n{}\n```\n'.format(parseMessage(body))
 
     try:
         channel_id = CHANNEL_MAP[data['project']]
