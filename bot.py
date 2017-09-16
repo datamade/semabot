@@ -126,11 +126,9 @@ if __name__ == "__main__":
     with open('/tmp/bot_running.txt', 'w') as f:
         f.write(deployment_id)
 
-
     def signalHandler(signum, frame):
         flow.set_processing_notifications(value=False)
         sys.exit(0)
-
 
     signal.signal(signal.SIGINT, signalHandler)
     signal.signal(signal.SIGTERM, signalHandler)
