@@ -6,7 +6,6 @@ language: python
 python:
 - '3.5'
 install:
-- pip install --upgrade pip
 - pip install -r requirements.txt
 dist: trusty
 sudo: false
