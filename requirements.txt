@@ -1,5 +1,4 @@
 Flask==0.12.2
--e git+https://github.com/SpiderOak/flow-python.git#egg=flow-python
 gunicorn==19.7.1
 validatesns==0.1.1
 raven[flask]
