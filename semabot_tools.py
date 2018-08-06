@@ -2,15 +2,16 @@ import time
 
 import requests
 from raven import Client
+import boto3
 
-from flow import Flow
+import flow as flow_module
 
 from config import BOTNAME, BOTPW, ORG_ID, SENTRY_ACCESS_TOKEN, CHANNEL_MAP
 
 try:
-    flow = Flow(BOTNAME)
-except flow.FlowError as e:
-    flow = Flow()
+    flow = flow_module.Flow(BOTNAME)
+except flow_module.Flow.FlowError as e:
+    flow = flow_module.Flow()
     flow.create_device(BOTNAME, BOTPW)
     print('Device for bot {} created'.format(BOTNAME))
 
@@ -49,9 +50,22 @@ def test_sentry(app_name):
     print('You should see this Sentry Event: {} in Semaphor'.format(event_url))
 
 
+def test_error(alarm_name):
+    cloudwatch = boto3.client('cloudwatch')
+    response = cloudwatch.describe_alarms()
+    alarm_names = [a['AlarmName'] for a in response['MetricAlarms']]
+
+    if alarm_name not in alarm_names:
+        print('{} is not a valid alarm'.format(alarm_name))
+        return
+
+    cloudwatch.set_alarm_state(AlarmName=alarm_name,
+                               StateValue='ALARM',
+                               StateReason="Threshold Crossed: 1 out of the last 1 datapoints [12.0 (16/05/18 15:04:00)] was greater than or equal to the threshold (1.0) (minimum 1 datapoint for OK -> ALARM transition).")
+
+
 if __name__ == "__main__":
     import argparse
-    import sys
 
     channels = list(CHANNEL_MAP.keys())
 
@@ -59,19 +73,21 @@ if __name__ == "__main__":
     parser.add_argument('--test-sentry', type=str, help='Test sentry integration for a given app')
     parser.add_argument('--test-codedeploy', type=str, help='Test CodeDeploy integration for a given app')
     parser.add_argument('--test-travis', type=str, help='Test')
+    parser.add_argument('--test-error', type=str, help='Test')
 
     args = parser.parse_args()
 
-    all_args = {args.test_sentry, args.test_codedeploy, args.test_travis}
+    all_args = {args.test_sentry, args.test_codedeploy, args.test_travis, args.test_error}
 
-    if all_args == {None}:
-        parser.print_help()
-        print_channels()
+    # if all_args == {None}:
+    #     parser.print_help()
+    #     print_channels()
 
-    elif all_args.isdisjoint(set(channels)):
-        print('"{all_args}" is not a valid application. Please choose a valid application:\n {channels}'.format(channels='\n'.join(channels),
-                                                                                                                all_args=', '.join(a for a in all_args if a)))
-        sys.exit(0)
+    # elif all_args.isdisjoint(set(channels)):
+    #     message = '"{all_args}" is not a valid application. Please choose a valid application:\n {channels}'
+    #     print(message.format(channels='\n'.join(channels),
+    #                          all_args=', '.join(a for a in all_args if a)))
+    #     sys.exit(0)
 
     if args.test_sentry:
         test_sentry(args.test_sentry)
@@ -81,3 +97,6 @@ if __name__ == "__main__":
 
     if args.test_travis:
         print('Not yet implemented')
+
+    if args.test_error:
+        test_error(args.test_error)

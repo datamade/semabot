@@ -13,17 +13,6 @@ before_script:
 - cp configs/config.py.travis config.py
 script:
 - flake8 --ignore=E501
-after_deploy:
-- if [ "$TRAVIS_TAG" ]; then curl -sL https://sentry.io/get-cli/ | bash; fi
-- if [ "$TRAVIS_TAG" ]; then export SENTRY_ORG=datamade; fi
-- if [ "$TRAVIS_TAG" ]; then export SENTRY_PROJECT=semaphor-bot; fi
-- if [ "$TRAVIS_TAG" ]; then VERSION=$(/usr/local/bin/sentry-cli releases propose-version);
-  fi
-- if [ "$TRAVIS_TAG" ]; then /usr/local/bin/sentry-cli releases new $VERSION; fi
-- if [ "$TRAVIS_TAG" ]; then /usr/local/bin/sentry-cli releases set-commits $VERSION
-  --commit datamade/semabot@`git rev-parse HEAD`; fi
-- if [ "$TRAVIS_TAG" ]; then /usr/local/bin/sentry-cli releases finalize $VERSION;
-  fi
 notifications:
   webhooks:
     - https://semabot.datamade.us/travis/
