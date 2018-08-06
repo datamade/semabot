@@ -83,10 +83,10 @@ def sentry_message():
     event = data['event']
 
     try:
-        body = event['sentry.interfaces.Exception']
+        body = event['exception']
         message += '\n```\n{}\n```\n'.format(parseException(body))
     except KeyError:
-        body = event['sentry.interfaces.Message']
+        body = event['message']
         message += '\n```\n{}\n```\n'.format(parseMessage(body))
 
     try:
@@ -114,7 +114,22 @@ def errors():
         requests.get(data['SubscribeURL'])
 
     elif message_type == 'Notification':
-        sentry.captureMessage(data)
+        try:
+            message_data = json.loads(data['Message'])
+        except JSONDecodeError:
+            # This handles the case where the notification is not an actual
+            # deployment. This happens when you setup a new trigger
+            channel_id = CHANNEL_MAP['semabot']
+            message = '**{}**\n'.format(data['Subject'])
+            message += data['Message']
+            flow.send_message(ORG_ID, channel_id, message)
+            return 'foop'
+
+        new_state_value = message_data['NewStateValue']
+        if new_state_value == 'ALARM':
+
+            metric_name = message_data['Trigger']['MetricName']
+            print(metric_name)
 
     return 'fwip'
 
