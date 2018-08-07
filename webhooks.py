@@ -13,7 +13,7 @@ from flow import Flow
 from raven.contrib.flask import Sentry
 
 from config import ORG_ID, CHANNEL_MAP, SENTRY_DSN, BOTNAME, BOTPW, TRAVIS_MAP
-from utils import parseException, parseMessage
+from utils import parseException
 
 app = Flask(__name__)
 
