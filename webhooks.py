@@ -82,12 +82,20 @@ def sentry_message():
     message += '**{message}**\n{url}'.format(**data)
     event = data['event']
 
-    try:
-        body = event['exception']
-        message += '\n```\n{}\n```\n'.format(parseException(body))
-    except KeyError:
-        body = event['message']
-        message += '\n```\n{}\n```\n'.format(parseMessage(body))
+    exception_parsed = False
+
+    for key in ['exception', 'breadcrumbs', 'message']:
+
+        try:
+            body = event[key]
+            message += '\n```\n{}\n```\n'.format(parseException(body))
+            exception_parsed = True
+            break
+        except KeyError:
+            pass
+
+    if not exception_parsed:
+        message += '\n```Unable to parse exception```\n'
 
     try:
         channel_id = CHANNEL_MAP[data['project']]
