@@ -66,6 +66,7 @@ def test_error(alarm_name):
 
 if __name__ == "__main__":
     import argparse
+    import sys
 
     channels = list(CHANNEL_MAP.keys())
 
