@@ -6,12 +6,12 @@ language: python
 python:
 - '3.5'
 install:
+- pip install --upgrade pip<10
 - pip install -r requirements.txt
 dist: trusty
 sudo: false
 before_script:
 - cp configs/config.py.travis config.py
-- pip install --upgrade pip<10
 script:
 - flake8 --ignore=E501
 notifications:
