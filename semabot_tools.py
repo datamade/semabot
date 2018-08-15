@@ -79,15 +79,15 @@ if __name__ == "__main__":
 
     all_args = {args.test_sentry, args.test_codedeploy, args.test_travis, args.test_error}
 
-    # if all_args == {None}:
-    #     parser.print_help()
-    #     print_channels()
+    if all_args == {None}:
+        parser.print_help()
+        print_channels()
 
-    # elif all_args.isdisjoint(set(channels)):
-    #     message = '"{all_args}" is not a valid application. Please choose a valid application:\n {channels}'
-    #     print(message.format(channels='\n'.join(channels),
-    #                          all_args=', '.join(a for a in all_args if a)))
-    #     sys.exit(0)
+    elif all_args.isdisjoint(set(channels)):
+        message = '"{all_args}" is not a valid application. Please choose a valid application:\n {channels}'
+        print(message.format(channels='\n'.join(channels),
+                             all_args=', '.join(a for a in all_args if a)))
+        sys.exit(0)
 
     if args.test_sentry:
         test_sentry(args.test_sentry)
