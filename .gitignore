@@ -4,6 +4,7 @@
 __pycache__
 keys.tar
 private.key
+config.py
 /configs/config.py
 /configs/nginx_template.conf
 /configs/supervisor_template.conf
