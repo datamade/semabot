@@ -54,7 +54,7 @@ Do you want to log Sentry errors to Semaphor? tell your friends about successful
 
 1. Create a new project channel in Semaphor.
 2. Add botbotbot as a member.
-3. Update the config.py.gpg. (For locally testing, get the contents of this file with: `blackbox_cat configs/config.py >> config.py`) You need to update `CHANNEL_MAP`, `TRAVIS_MAP`, and `NICE_NAMES`. Getting the correct channel ID may require a little patience. First, try to run:
+3. Update `CHANNEL_MAP`, `TRAVIS_MAP`, and `NICE_NAMES` in config.py.gpg. Getting the correct channel ID may require a little patience. First, try to run:
 
 ```
 python semabot_tools.py
@@ -67,7 +67,7 @@ python semabot_tools.py
 FileNotFoundError: [Errno 2] No such file or directory: '/Applications/Semaphor.app/Contents/Resources/app/build-version.json’
 ```
 
-In this case, you can copy, move, and/or sneakily rename Semaphor to the location that `python-flow` expects. Then, run `semabot_tools` again - until you see something like:
+In this case, you can copy, move, and/or sneakily rename Semaphor to the location that `python-flow` expects. Then, run `semabot_tools` again (possibly, multiple times!) - until you see something like:
 
 ```
 Your bot "botbotbot" has access to these channels:
