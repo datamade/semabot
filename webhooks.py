@@ -19,7 +19,7 @@ app = Flask(__name__)
 
 try:
     flow = Flow(BOTNAME)
-except flow.FlowError as e:
+except flow.FlowError:
     flow = Flow()
     flow.create_device(BOTNAME, BOTPW)
     app.logger.info('Device for bot {} created'.format(BOTNAME))

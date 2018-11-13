@@ -4,7 +4,7 @@ from config import ORG_ID, CHANNEL_MAP, BOTNAME, BOTPW, NICE_NAMES
 
 try:
     flow = Flow(BOTNAME)
-except flow.FlowError as e:
+except flow.FlowError:
     flow = Flow()
     flow.create_device(BOTNAME, BOTPW)
 

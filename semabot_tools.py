@@ -10,7 +10,7 @@ from config import BOTNAME, BOTPW, ORG_ID, SENTRY_ACCESS_TOKEN, CHANNEL_MAP
 
 try:
     flow = flow_module.Flow(BOTNAME)
-except flow_module.Flow.FlowError as e:
+except flow_module.Flow.FlowError:
     flow = flow_module.Flow()
     flow.create_device(BOTNAME, BOTPW)
     print('Device for bot {} created'.format(BOTNAME))
