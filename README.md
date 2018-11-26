@@ -53,8 +53,10 @@ python setup.py install
 Do you want to log Sentry errors to Semaphor? tell your friends about successful deployments? know when Travis does its business? Follow these steps.
 
 1. Create a new project channel in Semaphor.
-2. Add botbotbot as a member.
-3. Update `CHANNEL_MAP`, `TRAVIS_MAP`, and `NICE_NAMES` in config.py.gpg. Getting the correct channel ID may require a little patience. First, try to run:
+2. Add botbotbot as a member. **Note that it takes 5-10 minutes for your channel to appear to semabot for development purposes.**
+3. Update `CHANNEL_MAP`, `TRAVIS_MAP`, and `NICE_NAMES` in config.py.gpg.
+
+Getting the correct channel ID may require a little patience. First, try to run:
 
 ```
 python semabot_tools.py
@@ -79,7 +81,9 @@ Your bot "botbotbot" has access to these channels:
 "your-new-channel": XXXXXXXXXXXXXXXXXXXXX
 ```
 
-Paste the ID into the config. 
+If you do not see your channel, and you are certain you've added `botbotbot` as a member, wait a few minutes, then try again.
+
+Once your channel appears, paste the ID into the config.
 
 Finally, in the `.travis` file of your application, add the webhook below, and enjoy your message thread in Semaphor!
 
