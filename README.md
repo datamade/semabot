@@ -1,16 +1,17 @@
 # SEMABOT
 
 See [`config.py.example`](config.py.example) to add your app to Semabot
-(DataMaders) or configure a Semabot of your own (everyone else)! 
+(DataMaders) or configure a Semabot of your own (everyone else)!
 
 ### Installing the requirements
 
-This app relies upon SpiderOak's [flow-python](https://github.com/SpiderOak/flow-python) project to post messages to Semaphor. Unfortunately, it seems that the way that it is packaged doesn't make it possible to be pip installed. Instead, you need to clone their repo, activate the virtual environment that you'd like to install it into, and then run the `setup.py` script that's distributed with the project.
+This app relies upon SpiderOak's [flow-python](https://github.com/SpiderOak/flow-python) project to post messages to Semaphor. Unfortunately, it seems that the way that it is packaged doesn't make it possible to be pip installed. Instead, you need to clone their repo, activate the virtual environment that you'd like to install it into (we recommend calling it `semabot`), and then run the `setup.py` script that's distributed with the project.
 
 ```
 git clone https://github.com/SpiderOak/flow-python
 cd flow-python
-workon <name of virtualenv>
+mkvirtualenv semabot
+workon semabot
 python setup.py install
 ```
 
@@ -18,7 +19,8 @@ Once that is taken care of, you should be able to install the rest of the
 requirements using `pip`:
 
 ```
-cd <path to semabot>
+cd <path to this semabot repo>
+pip install --upgrade 'pip<10'
 pip install -r requirements.txt
 ```
 
@@ -53,10 +55,18 @@ python setup.py install
 Do you want to log Sentry errors to Semaphor? tell your friends about successful deployments? know when Travis does its business? Follow these steps.
 
 1. Create a new project channel in Semaphor.
-2. Add botbotbot as a member. **Note that it takes 5-10 minutes for your channel to appear to semabot for development purposes.**
-3. Update `CHANNEL_MAP`, `TRAVIS_MAP`, and `NICE_NAMES` in config.py.gpg.
 
-Getting the correct channel ID may require a little patience. First, try to run:
+2. Add botbotbot as a member. **Note that it takes 5-10 minutes for your channel to appear to semabot for development purposes.**
+
+3. Decrypt `config.py.gpg` (you'll need to be on the keyring for this)
+
+4. Copy `config.py` to the root:
+
+```
+cp configs/config.py config.py
+```
+
+5. Update `CHANNEL_MAP`, `TRAVIS_MAP`, and `NICE_NAMES` in `config.py`. Getting the correct channel ID for `CHANNEL_MAP` may require a little patience. First, try to run:
 
 ```
 python semabot_tools.py
@@ -85,17 +95,18 @@ If you do not see your channel, and you are certain you've added `botbotbot` as 
 
 Once your channel appears, paste the ID into the config.
 
-Finally, in the `.travis` file of your application, add the webhook below, and enjoy your message thread in Semaphor!
+6. Copy `config.py` back to the configs folder:
+
+```
+cp config.py configs/config.py
+```
+
+7. Reencrypt `config.py` and open a PR with your new channel configured.
+
+8. Finally, in the `.travis` file of your application, add the webhook below, and enjoy your message thread in Semaphor!
 
 ```
 notifications:
   webhooks:
     - https://semabot.datamade.us/travis/
 ```
-
-
-
-
-
-
-
