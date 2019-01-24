@@ -1,3 +1,7 @@
+from datetime import datetime, timedelta
+
+import boto3
+
 from flow import Flow
 
 from config import ORG_ID, CHANNEL_MAP, BOTNAME, BOTPW, NICE_NAMES
@@ -12,6 +16,7 @@ except flow.FlowError:
 class MessageHandler(object):
     def __init__(self, message, sender_id, channel_id):
         self.message = message.lower().strip()
+        self.raw_message = message.strip()
         self.sender_id = sender_id
         self.channel_id = channel_id
         self.sender_name = flow.get_peer_from_id(sender_id)["username"]
@@ -22,6 +27,8 @@ class MessageHandler(object):
 
         if self.message == 'help':
             response = self.helpText()
+        elif self.message.startswith('awslogs'):
+            response = self.awsLogs()
 
         if response:
             flow.send_message(ORG_ID, self.channel_id, response)
@@ -43,8 +50,63 @@ Here are the things you can do:
 
         return message
 
-    def awsLogs(self, message):
-        pass
+    def awsLogs(self):
+        client = boto3.client('logs')
+
+        message_parts = self.raw_message.split(' ')
+
+        # Pretty stupid way of doing this but it was fast
+        if len(message_parts) == 2:
+
+            if len(message_parts[-1].split(':')) == 2:
+                log_group, stream = message_parts[-1].split(':')
+                response = '**Last 24 hours of {}-{}**'.format(log_group, stream)
+
+                a_day_ago = datetime.now() - timedelta(hours=24)
+                a_day_ago = int(a_day_ago.timestamp()) * 1000
+
+                results = client.filter_log_events(logGroupName=log_group,
+                                                   logStreamNames=[stream],
+                                                   startTime=a_day_ago)
+
+                messages = '\n'.join([m['message'] for m in results['events']])
+
+                response = '```\n{}\n```'.format(messages)
+
+            elif message_parts[-1] == 'list':
+                log_groups = client.describe_log_groups()
+                response = '**Log Groups**\n'
+                response += '\n'.join(['* {}'.format(g['logGroupName']) for g in log_groups['logGroups']])
+
+        elif len(message_parts) == 3:
+            log_group_name = message_parts[1]
+            log_group_streams = client.describe_log_streams(logGroupName=log_group_name)
+            response = '**Log Streams for {}**\n'.format(log_group_name)
+            response += '\n'.join(['* {}'.format(g['logStreamName']) for g in log_group_streams['logStreams']])
+
+        elif len(message_parts) == 4:
+            _, location, _, query = message_parts
+
+            if len(location.split(':')) == 2:
+                log_group, stream = location.split(':')
+                results = client.filter_log_events(logGroupName=log_group,
+                                                   logStreamNames=[stream],
+                                                   filterPattern=query,
+                                                   limit=50)
+
+            else:
+                results = client.filter_log_events(logGroupName=location,
+                                                   filterPattern=query,
+                                                   limit=50)
+
+            if results['events']:
+                messages = '\n'.join([m['message'] for m in results['events']])
+                response = '**Log events matching "{}"**\n'.format(query)
+                response += '```\n{}\n```'.format(messages)
+            else:
+                response = '**No results**'
+
+        return response
 
 
 @flow.message
