@@ -4,7 +4,7 @@ import boto3
 
 from flow import Flow
 
-from config import ORG_ID, CHANNEL_MAP, BOTNAME, BOTPW, NICE_NAMES
+from config import ORG_ID, CHANNEL_MAP, BOTNAME, BOTPW
 
 try:
     flow = Flow(BOTNAME)
@@ -34,7 +34,6 @@ class MessageHandler(object):
             flow.send_message(ORG_ID, self.channel_id, response)
 
     def helpText(self):
-        projects = []
 
         for slug, channel_id in CHANNEL_MAP.items():
             if slug in ['devops', 'bot-testing']:
