@@ -125,8 +125,6 @@ def errors():
         try:
             message_data = json.loads(data['Message'])
         except JSONDecodeError:
-            # This handles the case where the notification is not an actual
-            # deployment. This happens when you setup a new trigger
             channel_id = CHANNEL_MAP['semabot']
             message = '**{}**\n'.format(data['Subject'])
             message += data['Message']
@@ -214,6 +212,12 @@ def deployments():
         flow.send_message(ORG_ID, channel_id, message)
 
     return 'foop'
+
+
+@app.route('/test-payload/<filename>', methods=['PUT'])
+def test_payload(filename):
+    print(filename, request.headers['X-Hostname'])
+    return 'froop'
 
 
 if __name__ == "__main__":

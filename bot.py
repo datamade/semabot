@@ -22,22 +22,6 @@ class MessageHandler(object):
 
         if self.message == 'help':
             response = self.helpText()
-        elif self.message == 'last deployment':
-            response = self.lastDeployment()
-        elif self.message == 'last error':
-            response = self.lastError()
-        elif self.message == 'last commit':
-            response = self.lastCommit()
-        elif self.message == 'last comment':
-            response = self.lastComment()
-        elif self.message == 'last issue':
-            response = self.lastIssue()
-        elif self.message == 'last branch':
-            response = self.lastBranch()
-        elif self.message == 'last build':
-            response = self.lastBuild()
-        elif self.message.startswith('stats since'):
-            response = self.stats()
 
         if response:
             flow.send_message(ORG_ID, self.channel_id, response)
@@ -46,55 +30,21 @@ class MessageHandler(object):
         projects = []
 
         for slug, channel_id in CHANNEL_MAP.items():
-            if channel_id == self.channel_id:
-                projects.append(NICE_NAMES[slug])
-
-        message = '**Hi there {}!**\n'.format(self.sender_name)
-        message += 'The projects associated with this channel are: \n{}'.format('\n  '.join(projects))
-        message += '\n{}\n'.format('*' * 50)
-        message += '''
+            if slug in ['devops', 'bot-testing']:
+                message = '**Hi there {}!**\n'.format(self.sender_name)
+                message += '''
 Here are the things you can do:
-  `last error`: Returns the last error message logged in this channel from sentry
-  `last commit`: Returns the last commit logged in this channel from Github
-  `last comment`: Returns the last comment logged in this channel from Github
-  `last issue`: Returns the last issue logged in this channel from Github
-  `last deployment`: Returns the last deployment logged in this channel from CodeDeploy
-  `last build`: Returns the last build from Travis
-  `stats since <datetime>`: Returns error and deployment counts since a given time for this channel
-        '''
+  `awslogs list`: Returns a list of log groups we have configured
+  `awslogs <log group name> list`: Returns a list of log streams for the given log group
+  `awslogs <log group name>:<log stream name>`: Returns the last 24 hours of logs for the given log stream
+  `awslogs <log group name> search <query>`: Searches an entire log group for the last 24 hours for the given query
+  `awslogs <log group name>:<log stream name> search <query>`: Searches a log stream for the last 24 hours for the given query
+                '''
 
         return message
 
-    def lastError(self):
-        return "Not yet implemented"
-
-    def lastCommit(self):
-        return "Not yet implemented"
-
-    def lastComment(self):
-        return "Not yet implemented"
-
-    def lastIssue(self):
-        return "Not yet implemented"
-
-    def lastBranch(self):
-        return "Not yet implemented"
-
-    def lastDeployment(self):
-        response = 'No deployment found'
-
-        for message in flow.enumerate_messages(ORG_ID, self.channel_id):
-            if 'aws codedeploy' in message['text']:
-                response = message['text']
-                break
-
-        return response
-
-    def stats(self):
-        return "Not yet implemented"
-
-    def lastBuild(self):
-        return "Not yet implemented"
+    def awsLogs(self, message):
+        pass
 
 
 @flow.message
