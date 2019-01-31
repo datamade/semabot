@@ -17,6 +17,14 @@ from utils import parseException
 
 app = Flask(__name__)
 
+# The way that the Flow object works is to configure a "device" for the account
+# that you're logging in with. You can think of this as an account logging in
+# with their phone first and then adding a laptop and maybe some other
+# workstation. Each place where the account logs in needs to be configured as
+# a "device". That's what this stuff below is all about. If the machine that is
+# running the code is not configured as a "device" for the botbotbot account,
+# then it configures it and moves on.
+
 try:
     flow = Flow(BOTNAME)
 except flow.FlowError:
@@ -31,6 +39,10 @@ if SENTRY_DSN:
 
 @app.route('/')
 def index():
+    '''
+    This is mostly a route that is setup to make sure that, once you have the
+    Flow stuff working above, you're actually able to send messages to Semaphor
+    '''
     channel_id = CHANNEL_MAP['semabot']
     flow.send_message(ORG_ID, channel_id, 'botbotbot')
     return 'foo'
@@ -38,12 +50,18 @@ def index():
 
 @app.route('/error/')
 def error():
+    '''
+    This is setup to make sure that sentry logging is working. It'll always
+    raise an error.
+    '''
     return 1 / 0
 
 
 @app.route('/pong/')
 def pong():
-
+    '''
+    The classic "pong" route from our zero downtime deployment strategy.
+    '''
     try:
         from deployment import DEPLOYMENT_ID
     except ImportError:
@@ -54,6 +72,12 @@ def pong():
 
 @app.route('/travis/', methods=['POST'])
 def travis():
+    '''
+    This route handles the webhook posts from Travis. To get a sense of what
+    that looks like, check out:
+    https://docs.travis-ci.com/user/notifications/#webhooks-delivery-format
+    '''
+
     data = json.loads(request.form['payload'])
 
     message = 'Travis build for started by **{committer_name}** for {name} ({branch}) finished with status **{status}**\n'
@@ -75,6 +99,9 @@ def travis():
 
 @app.route('/sentry/', methods=['POST'])
 def sentry_message():
+    '''
+    Handler for the webhooks from Sentry.
+    '''
 
     data = json.loads(request.data.decode('utf-8'))
 
@@ -108,6 +135,15 @@ def sentry_message():
 
 @app.route('/errors/', methods=['POST'])
 def errors():
+
+    '''
+    This is the beginngings of a handler for Cloudwatch notifications. To use
+    this, we would just have to setup a metric that we'd like to track (so, CPU
+    or memory use on a server, for example), create and Alarm for it (so, CPU
+    greater than 75% for more than a minute or something) and add the SNS topic
+    for this Semabot endpoint (which is called "errors") as a notification
+    channel.
+    '''
 
     data = json.loads(request.data.decode('utf-8'))
 
@@ -144,6 +180,9 @@ def errors():
 
 @app.route('/deployments/', methods=['POST'])
 def deployments():
+    '''
+    Handler for the CodeDeploy deployments.
+    '''
 
     data = json.loads(request.data.decode('utf-8'))
 
@@ -173,6 +212,12 @@ def deployments():
         deployment_id = message_data['deploymentId']
         instance_id = message_data['instanceId']
 
+        # In order for this to work, you need to have AWS credentials configured
+        # for the user that is running the script or, in the case of an EC2
+        # instance, you can also add a server level policy that allows these
+        # calls to happen. More here:
+        # https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
+
         client = boto3.client('codedeploy')
 
         deployment_instances = client.get_deployment_instance(deploymentId=deployment_id,
@@ -187,6 +232,8 @@ def deployments():
                 if event['status'] == 'Failed':
                     logs.append({'event': event['lifecycleEventName'],
                                  'log': event['diagnostics']['logTail']})
+
+        # See comment above about configuring the client.
 
         client = boto3.client('ec2')
         instance_info = client.describe_instances(InstanceIds=[instance_id])
