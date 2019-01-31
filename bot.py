@@ -50,6 +50,12 @@ Here are the things you can do:
         return message
 
     def awsLogs(self):
+        # In order for this to work, you need to have AWS credentials configured
+        # for the user that is running the script or, in the case of an EC2
+        # instance, you can also add a server level policy that allows these
+        # calls to happen. More here:
+        # https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
+
         client = boto3.client('logs')
 
         message_parts = self.raw_message.split(' ')
@@ -137,6 +143,8 @@ if __name__ == "__main__":
     with open('/tmp/bot_running.txt', 'w') as f:
         f.write(deployment_id)
 
+    # Setup a closure to handle gracefully stopping the processing of
+    # notifications.
     def signalHandler(signum, frame):
         flow.set_processing_notifications(value=False)
         sys.exit(0)
@@ -145,4 +153,9 @@ if __name__ == "__main__":
     signal.signal(signal.SIGTERM, signalHandler)
 
     print('Listening for notifications ...')
+
+    # This runs in an infinite loop and passes any notifications it receives to
+    # the function decorated above with "@flow.message". From there, we do
+    # a little processing and then hand the message off to the class above that
+    # works out how to respond.
     flow.process_notifications()
