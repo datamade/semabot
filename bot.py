@@ -1,6 +1,10 @@
+from datetime import datetime, timedelta
+
+import boto3
+
 from flow import Flow
 
-from config import ORG_ID, CHANNEL_MAP, BOTNAME, BOTPW, NICE_NAMES
+from config import ORG_ID, CHANNEL_MAP, BOTNAME, BOTPW
 
 try:
     flow = Flow(BOTNAME)
@@ -12,6 +16,7 @@ except flow.FlowError:
 class MessageHandler(object):
     def __init__(self, message, sender_id, channel_id):
         self.message = message.lower().strip()
+        self.raw_message = message.strip()
         self.sender_id = sender_id
         self.channel_id = channel_id
         self.sender_name = flow.get_peer_from_id(sender_id)["username"]
@@ -22,79 +27,91 @@ class MessageHandler(object):
 
         if self.message == 'help':
             response = self.helpText()
-        elif self.message == 'last deployment':
-            response = self.lastDeployment()
-        elif self.message == 'last error':
-            response = self.lastError()
-        elif self.message == 'last commit':
-            response = self.lastCommit()
-        elif self.message == 'last comment':
-            response = self.lastComment()
-        elif self.message == 'last issue':
-            response = self.lastIssue()
-        elif self.message == 'last branch':
-            response = self.lastBranch()
-        elif self.message == 'last build':
-            response = self.lastBuild()
-        elif self.message.startswith('stats since'):
-            response = self.stats()
+        elif self.message.startswith('awslogs'):
+            response = self.awsLogs()
 
         if response:
             flow.send_message(ORG_ID, self.channel_id, response)
 
     def helpText(self):
-        projects = []
 
         for slug, channel_id in CHANNEL_MAP.items():
-            if channel_id == self.channel_id:
-                projects.append(NICE_NAMES[slug])
-
-        message = '**Hi there {}!**\n'.format(self.sender_name)
-        message += 'The projects associated with this channel are: \n{}'.format('\n  '.join(projects))
-        message += '\n{}\n'.format('*' * 50)
-        message += '''
+            if slug in ['devops', 'bot-testing']:
+                message = '**Hi there {}!**\n'.format(self.sender_name)
+                message += '''
 Here are the things you can do:
-  `last error`: Returns the last error message logged in this channel from sentry
-  `last commit`: Returns the last commit logged in this channel from Github
-  `last comment`: Returns the last comment logged in this channel from Github
-  `last issue`: Returns the last issue logged in this channel from Github
-  `last deployment`: Returns the last deployment logged in this channel from CodeDeploy
-  `last build`: Returns the last build from Travis
-  `stats since <datetime>`: Returns error and deployment counts since a given time for this channel
-        '''
+  `awslogs list`: Returns a list of log groups we have configured
+  `awslogs <log group name> list`: Returns a list of log streams for the given log group
+  `awslogs <log group name>:<log stream name>`: Returns the last 24 hours of logs for the given log stream
+  `awslogs <log group name> search <query>`: Searches an entire log group for the last 24 hours for the given query
+  `awslogs <log group name>:<log stream name> search <query>`: Searches a log stream for the last 24 hours for the given query
+                '''
 
         return message
 
-    def lastError(self):
-        return "Not yet implemented"
+    def awsLogs(self):
+        # In order for this to work, you need to have AWS credentials configured
+        # for the user that is running the script or, in the case of an EC2
+        # instance, you can also add a server level policy that allows these
+        # calls to happen. More here:
+        # https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#configuring-credentials
 
-    def lastCommit(self):
-        return "Not yet implemented"
+        client = boto3.client('logs')
 
-    def lastComment(self):
-        return "Not yet implemented"
+        message_parts = self.raw_message.split(' ')
 
-    def lastIssue(self):
-        return "Not yet implemented"
+        # Pretty stupid way of doing this but it was fast
+        if len(message_parts) == 2:
 
-    def lastBranch(self):
-        return "Not yet implemented"
+            if len(message_parts[-1].split(':')) == 2:
+                log_group, stream = message_parts[-1].split(':')
+                response = '**Last 24 hours of {}-{}**'.format(log_group, stream)
 
-    def lastDeployment(self):
-        response = 'No deployment found'
+                a_day_ago = datetime.now() - timedelta(hours=24)
+                a_day_ago = int(a_day_ago.timestamp()) * 1000
 
-        for message in flow.enumerate_messages(ORG_ID, self.channel_id):
-            if 'aws codedeploy' in message['text']:
-                response = message['text']
-                break
+                results = client.filter_log_events(logGroupName=log_group,
+                                                   logStreamNames=[stream],
+                                                   startTime=a_day_ago)
+
+                messages = '\n'.join([m['message'] for m in results['events']])
+
+                response = '```\n{}\n```'.format(messages)
+
+            elif message_parts[-1] == 'list':
+                log_groups = client.describe_log_groups()
+                response = '**Log Groups**\n'
+                response += '\n'.join(['* {}'.format(g['logGroupName']) for g in log_groups['logGroups']])
+
+        elif len(message_parts) == 3:
+            log_group_name = message_parts[1]
+            log_group_streams = client.describe_log_streams(logGroupName=log_group_name)
+            response = '**Log Streams for {}**\n'.format(log_group_name)
+            response += '\n'.join(['* {}'.format(g['logStreamName']) for g in log_group_streams['logStreams']])
+
+        elif len(message_parts) == 4:
+            _, location, _, query = message_parts
+
+            if len(location.split(':')) == 2:
+                log_group, stream = location.split(':')
+                results = client.filter_log_events(logGroupName=log_group,
+                                                   logStreamNames=[stream],
+                                                   filterPattern=query,
+                                                   limit=50)
+
+            else:
+                results = client.filter_log_events(logGroupName=location,
+                                                   filterPattern=query,
+                                                   limit=50)
+
+            if results['events']:
+                messages = '\n'.join([m['message'] for m in results['events']])
+                response = '**Log events matching "{}"**\n'.format(query)
+                response += '```\n{}\n```'.format(messages)
+            else:
+                response = '**No results**'
 
         return response
-
-    def stats(self):
-        return "Not yet implemented"
-
-    def lastBuild(self):
-        return "Not yet implemented"
 
 
 @flow.message
@@ -126,6 +143,8 @@ if __name__ == "__main__":
     with open('/tmp/bot_running.txt', 'w') as f:
         f.write(deployment_id)
 
+    # Setup a closure to handle gracefully stopping the processing of
+    # notifications.
     def signalHandler(signum, frame):
         flow.set_processing_notifications(value=False)
         sys.exit(0)
@@ -134,4 +153,9 @@ if __name__ == "__main__":
     signal.signal(signal.SIGTERM, signalHandler)
 
     print('Listening for notifications ...')
+
+    # This runs in an infinite loop and passes any notifications it receives to
+    # the function decorated above with "@flow.message". From there, we do
+    # a little processing and then hand the message off to the class above that
+    # works out how to respond.
     flow.process_notifications()
