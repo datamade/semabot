@@ -1,4 +1,4 @@
-Flask==0.12.2
+Flask==1.0
 https://github.com/SpiderOak/flow-python/zipball/cef08f575a62871a0f1883b4fb19ee69c99c5ba8
 gunicorn==19.7.1
 validatesns==0.1.1
